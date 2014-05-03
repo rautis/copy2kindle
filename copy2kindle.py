@@ -17,6 +17,15 @@ def zip_dir(path, zipFile):
     	   	for file in files:
         	   	bookzip.write(os.path.join(root, file))
 
+def change_plist_format(plist, targetFormat):
+	devnull = open(os.devnull, 'wb')
+	plistReformat = [ "plutil", "-convert", targetFormat, plist ]
+	ret = subprocess.call(plistReformat, stdout = devnull, stderr = subprocess.STDOUT)
+
+	if ret != 0:
+		print "Something went wrong while reformatting %s to %s format" % (plist, targetFormat)
+		sys.exit(2)
+
 def copy_to_kindle(bookName):
 	mobiName = bookName.replace(".epub", ".mobi")
 	if not os.path.exists(kindlePath):
@@ -61,6 +70,7 @@ def handle_input(books):
 			return True
 
 def iter_books(plist, filter = None):
+	change_plist_format(plist, "xml1")
 	books=plistlib.readPlist(plist)['Books']
 	filter = filter.lower() if filter else None
 
@@ -74,11 +84,13 @@ def iter_books(plist, filter = None):
 		if (i  % 10) == 0 and i != 0:
 			print_op()
 			if not handle_input(books):
-				return
+				break
 			
 	if (i % 10) != 0:
 		print_op()
 		handle_input(books)
+
+	change_plist_format(plist, "binary1")
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
