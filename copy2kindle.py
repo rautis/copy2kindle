@@ -23,30 +23,30 @@ def change_plist_format(plist, targetFormat):
 	ret = subprocess.call(plistReformat, stdout = devnull, stderr = subprocess.STDOUT)
 
 	if ret != 0:
-		print "Something went wrong while reformatting %s to %s format" % (plist, targetFormat)
+		print(f"Something went wrong while reformatting {plist} to {targetFormat} format")
 		sys.exit(2)
 
 def copy_to_kindle(bookName):
 	mobiName = bookName.replace(".epub", ".mobi")
 	if not os.path.exists(kindlePath):
-		print "Kindle does not seem to be connected; the converted book is available in %s" % (tempDir + mobiName)
+		print(f"Kindle does not seem to be connected; the converted book is available in {tempDir + mobiName}")
 		return
 
-	print "Copying converted ebook to Kindle"
+	print("Copying converted ebook to Kindle")
 	shutil.copyfile(tempDir + mobiName, kindlePath + mobiName)
 
 def convert_book(bookName):
-	print "Converting to mobi format"
+	print("Converting to mobi format")
 	mobiName = bookName.replace(".epub", ".mobi")
 	devnull = open(os.devnull, 'wb')
 	ret = subprocess.call([calibreCommand, tempDir + bookName, tempDir + mobiName], stdout=devnull, stderr=subprocess.STDOUT)
 	if ret != 0:
-		print "Something went wrong with conversion"
+		print("Something went wrong with conversion")
 
 def process_book(book):
 	bookName = book['BKDisplayName']
 	if os.path.isdir(book['path']):
-		print "Rezipping epub"
+		print("Rezipping epub")
 		zip_dir(book['path'], tempDir + bookName)
 	else:
 		shutil.copyfile(book['path'], tempDir + bookName)
@@ -55,7 +55,7 @@ def process_book(book):
 	copy_to_kindle(bookName)
 
 def print_op():
-	print "book number to copy it to Kindle, (n) next page, (q) to quit"
+	print("book number to copy it to Kindle, (n) next page, (q) to quit")
 
 def handle_input(books):
 	while True:
@@ -63,9 +63,9 @@ def handle_input(books):
 		if ch == "q":
 			return False
 		elif ch.isdigit():
-			print "Processing book %s" % (books[int(ch) - 1]['BKDisplayName'])
+			print("Processing book %s" % (books[int(ch) - 1]['BKDisplayName']))
 			process_book(books[int(ch) - 1])
-			print "Done"
+			print("Done")
 		else:
 			return True
 
@@ -80,7 +80,7 @@ def iter_books(plist, filter = None):
 		if filter:
 			if not filter in book['BKDisplayName'].lower():
 				continue
-		print "%i:  %s" % ((i + 1), book['BKDisplayName'])
+		print(f"{(i + 1)}: {book['BKDisplayName']}")
 		if (i  % 10) == 0 and i != 0:
 			print_op()
 			if not handle_input(books):
